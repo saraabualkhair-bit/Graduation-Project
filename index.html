@@ -2,56 +2,729 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Project Information</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supply Chain Dataset Analysis</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-      margin: 40px;
+    :root {
+      --navy: #0a0f1e;
+      --deep: #0d1530;
+      --card: #111827;
+      --border: rgba(255,255,255,0.07);
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --teal: #2dd4bf;
+      --muted: #6b7280;
+      --light: #e5e7eb;
+      --white: #f9fafb;
     }
-    h1, h2 {
-      color: #333;
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--navy);
+      color: var(--light);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Background mesh */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(201,168,76,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(45,212,191,0.08) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.4;
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 60px 40px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 80px;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    .tag {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+      border: 1px solid rgba(201,168,76,0.3);
+      padding: 6px 16px;
+      border-radius: 2px;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 900;
+      line-height: 1.1;
+      color: var(--white);
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+    }
+
+    h1 span {
+      color: var(--gold);
+      font-style: italic;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 300;
+      letter-spacing: 0.5px;
+    }
+
+    .divider {
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+      margin: 24px auto 0;
+    }
+
+    /* Instructor banner */
+    .instructor-bar {
+      background: linear-gradient(135deg, rgba(201,168,76,0.1), rgba(201,168,76,0.05));
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 8px;
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 60px;
+      animation: fadeUp 0.8s 0.1s ease both;
+    }
+
+    .instructor-bar .label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .instructor-bar .name {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--white);
+    }
+
+    .dot {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--gold);
+      opacity: 0.5;
+    }
+
+    /* Section titles */
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .section-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--gold);
+      opacity: 0.7;
+    }
+
+    section {
+      margin-bottom: 60px;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    section:nth-child(2) { animation-delay: 0.15s; }
+    section:nth-child(3) { animation-delay: 0.25s; }
+    section:nth-child(4) { animation-delay: 0.35s; }
+    section:nth-child(5) { animation-delay: 0.45s; }
+
+    /* Team grid */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .team-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      transition: border-color 0.3s, transform 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .team-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), var(--teal));
+      transform: scaleX(0);
+      transition: transform 0.3s;
+    }
+
+    .team-card:hover {
+      border-color: rgba(201,168,76,0.3);
+      transform: translateY(-3px);
+    }
+
+    .team-card:hover::before { transform: scaleX(1); }
+
+    .avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(201,168,76,0.2), rgba(45,212,191,0.1));
+      border: 1px solid rgba(201,168,76,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .team-card .member-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--light);
+      line-height: 1.4;
+    }
+
+    /* Project Idea */
+    .idea-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--gold);
+      border-radius: 10px;
+      padding: 28px 32px;
+      font-size: 14px;
+      color: #9ca3af;
+      line-height: 1.8;
+    }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 32px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 10px; top: 8px; bottom: 8px;
+      width: 1px;
+      background: linear-gradient(180deg, var(--gold), rgba(201,168,76,0.1));
+    }
+
+    .week {
+      position: relative;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+      transition: border-color 0.3s;
+    }
+
+    .week:hover { border-color: rgba(201,168,76,0.25); }
+
+    .week::before {
+      content: '';
+      position: absolute;
+      left: -27px; top: 28px;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--gold);
+      border: 2px solid var(--navy);
+      box-shadow: 0 0 10px rgba(201,168,76,0.5);
+    }
+
+    .week-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .week-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.2);
+      padding: 4px 10px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .week-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .week-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 600px) { .week-body { grid-template-columns: 1fr; } }
+
+    .week-section label {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 10px;
+      opacity: 0.8;
+    }
+
+    .week-section ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .week-section ul li {
+      font-size: 13px;
+      color: #9ca3af;
+      padding-left: 14px;
+      position: relative;
+      line-height: 1.5;
+    }
+
+    .week-section ul li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--gold);
+      font-size: 10px;
+      top: 2px;
+    }
+
+    .tools-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .tool-chip {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: rgba(45,212,191,0.08);
+      border: 1px solid rgba(45,212,191,0.2);
+      color: var(--teal);
+    }
+
+    /* Roles */
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+    }
+
+    .role-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      transition: border-color 0.3s;
+    }
+
+    .role-card:hover { border-color: rgba(45,212,191,0.3); }
+
+    .role-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--white);
+      margin-bottom: 6px;
+    }
+
+    .role-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--teal);
+      opacity: 0.8;
+    }
+
+    /* KPIs */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px;
+    }
+
+    .kpi-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 22px;
+      text-align: center;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .kpi-card:hover {
+      border-color: rgba(201,168,76,0.3);
+      transform: translateY(-2px);
+    }
+
+    .kpi-icon {
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+
+    .kpi-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--light);
+      line-height: 1.4;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
+<div class="noise"></div>
+<div class="container">
 
-  <h1>Project Name:</h1>
-  
-  <p>Project Idea:</p>
+  <!-- Header -->
+  <div class="header">
+    <div class="tag">Project #2 · Data Analytics</div>
+    <h1>Supply Chain<br><span>Dataset Analysis</span></h1>
+    <p class="subtitle">Data Modeling · Forecasting · Visualization Dashboard</p>
+    <div class="divider"></div>
+  </div>
 
-  <h2>Team Members</h2>
-  <ul>
-    <li>Sara Abualkhair</li>
-    <li>Dalia Ibrahim</li>
-    <li>Reham Ibrahim</li>
-    <li>Momen Salah</li>
-    <li>Yousef Zaky</li>
-  </ul>
+  <!-- Instructor -->
+  <div class="instructor-bar">
+    <div>
+      <div class="label">Instructor</div>
+      <div class="name">Mohamed Yasser</div>
+    </div>
+    <div class="dot"></div>
+    <div>
+      <div class="label">Duration</div>
+      <div class="name">4 Weeks</div>
+    </div>
+    <div class="dot"></div>
+    <div>
+      <div class="label">Team Size</div>
+      <div class="name">5 Members</div>
+    </div>
+  </div>
 
-  <h2>Project Plan</h2>
-  <ol>
-    <li>Research & Analysis</li>
-    
-    <li>Visual Identity</li>
-    
-    <li>Main Designs</li>
-    
-    <li>Complementary Products</li>
-    
-    <li>Review & Finalization</li>
-    
-    <li>Final Presentation</li>
-  </ol>
+  <!-- Project Idea -->
+  <section>
+    <div class="section-title">
+      <span class="section-num">01</span> Project Overview
+    </div>
+    <div class="idea-box">
+      This project involves a comprehensive analysis of a Supply Chain dataset, spanning data modeling, cleaning, exploratory analysis, and predictive forecasting. The goal is to uncover actionable insights for decision makers by answering key analysis and forecasting questions, culminating in an interactive Tableau visualization dashboard and a final presentation report.
+    </div>
+  </section>
 
-  <h2>Roles & Responsibilities</h2>
+  <!-- Team Members -->
+  <section>
+    <div class="section-title">
+      <span class="section-num">02</span> Team Members
+    </div>
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="avatar">S</div>
+        <div class="member-name">Sara Abualkhair</div>
+      </div>
+      <div class="team-card">
+        <div class="avatar">D</div>
+        <div class="member-name">Dalia Ibrahim</div>
+      </div>
+      <div class="team-card">
+        <div class="avatar">R</div>
+        <div class="member-name">Reham Ibrahim</div>
+      </div>
+      <div class="team-card">
+        <div class="avatar">M</div>
+        <div class="member-name">Momen Salah</div>
+      </div>
+      <div class="team-card">
+        <div class="avatar">Y</div>
+        <div class="member-name">Yousef Zaky</div>
+      </div>
+    </div>
+  </section>
 
-  <h2>KPIs (Key Performance Indicators)</h2>
-  <ul>
-    
-    <li>Response time</li>
-    <li>System uptime</li>
-    <li>User adoption rate</li>
-  </ul>
+  <!-- Project Plan -->
+  <section>
+    <div class="section-title">
+      <span class="section-num">03</span> Project Plan
+    </div>
+    <div class="timeline">
 
-  <p><strong>Instructor:</strong> Mohamed Yasser
+      <div class="week">
+        <div class="week-header">
+          <span class="week-badge">Week 1</span>
+          <span class="week-title">Data Modeling, Cleaning & Preprocessing</span>
+        </div>
+        <div class="week-body">
+          <div class="week-section">
+            <label>Tasks</label>
+            <ul>
+              <li>Build a data model</li>
+              <li>Clean and preprocess the dataset</li>
+            </ul>
+          </div>
+          <div class="week-section">
+            <label>Deliverables</label>
+            <ul>
+              <li>Cleaned dataset ready for analysis</li>
+              <li>Data preprocessing notebook</li>
+            </ul>
+          </div>
+          <div class="week-section" style="grid-column: 1 / -1;">
+            <label>Tools</label>
+            <div class="tools-row">
+              <span class="tool-chip">SQL</span>
+              <span class="tool-chip">Python</span>
+              <span class="tool-chip">pandas</span>
+              <span class="tool-chip">Matplotlib</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week">
+        <div class="week-header">
+          <span class="week-badge">Week 2</span>
+          <span class="week-title">Analysis Questions Phase</span>
+        </div>
+        <div class="week-body">
+          <div class="week-section">
+            <label>Tasks</label>
+            <ul>
+              <li>Determine all possible analysis questions</li>
+              <li>Focus on decision-maker interests</li>
+              <li>Example: Impact of product category on revenue</li>
+            </ul>
+          </div>
+          <div class="week-section">
+            <label>Deliverables</label>
+            <ul>
+              <li>Set of analysis questions answerable via the dataset</li>
+            </ul>
+          </div>
+          <div class="week-section" style="grid-column: 1 / -1;">
+            <label>Tools</label>
+            <div class="tools-row">
+              <span class="tool-chip">SQL</span>
+              <span class="tool-chip">Python</span>
+              <span class="tool-chip">pandas</span>
+              <span class="tool-chip">Matplotlib</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week">
+        <div class="week-header">
+          <span class="week-badge">Week 3</span>
+          <span class="week-title">Forecasting Questions Phase</span>
+        </div>
+        <div class="week-body">
+          <div class="week-section">
+            <label>Tasks</label>
+            <ul>
+              <li>Determine forecasting questions</li>
+              <li>Answer them using dataset trends</li>
+            </ul>
+          </div>
+          <div class="week-section">
+            <label>Deliverables</label>
+            <ul>
+              <li>Visualization plots answering forecasting questions</li>
+            </ul>
+          </div>
+          <div class="week-section" style="grid-column: 1 / -1;">
+            <label>Tools</label>
+            <div class="tools-row">
+              <span class="tool-chip">Python</span>
+              <span class="tool-chip">scikit-learn</span>
+              <span class="tool-chip">pandas</span>
+              <span class="tool-chip">Matplotlib</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week">
+        <div class="week-header">
+          <span class="week-badge">Week 4</span>
+          <span class="week-title">Dashboard & Final Presentation</span>
+        </div>
+        <div class="week-body">
+          <div class="week-section">
+            <label>Tasks</label>
+            <ul>
+              <li>Build Tableau visualization dashboard</li>
+              <li>Prepare final report and presentation</li>
+              <li>Summarize data analysis & model development</li>
+            </ul>
+          </div>
+          <div class="week-section">
+            <label>Deliverables</label>
+            <ul>
+              <li>Visualization dashboard</li>
+              <li>Final report & presentation</li>
+            </ul>
+          </div>
+          <div class="week-section" style="grid-column: 1 / -1;">
+            <label>Tools</label>
+            <div class="tools-row">
+              <span class="tool-chip">SQL</span>
+              <span class="tool-chip">Python</span>
+              <span class="tool-chip">pandas</span>
+              <span class="tool-chip">Matplotlib</span>
+              <span class="tool-chip">Tableau</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Roles & Responsibilities -->
+  <section>
+    <div class="section-title">
+      <span class="section-num">04</span> Roles & Responsibilities
+    </div>
+    <div class="roles-grid">
+      <div class="role-card">
+        <div class="role-name">Sara Abualkhair</div>
+        <div class="role-title">Data Modeling</div>
+      </div>
+      <div class="role-card">
+        <div class="role-name">Dalia Ibrahim</div>
+        <div class="role-title">Data Cleaning & EDA</div>
+      </div>
+      <div class="role-card">
+        <div class="role-name">Reham Ibrahim</div>
+        <div class="role-title">Analysis Questions</div>
+      </div>
+      <div class="role-card">
+        <div class="role-name">Momen Salah</div>
+        <div class="role-title">Forecasting & ML</div>
+      </div>
+      <div class="role-card">
+        <div class="role-name">Yousef Zaky</div>
+        <div class="role-title">Dashboard & Presentation</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KPIs -->
+  <section>
+    <div class="section-title">
+      <span class="section-num">05</span> KPIs
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon">⚡</div>
+        <div class="kpi-label">Response Time</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">🟢</div>
+        <div class="kpi-label">System Uptime</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">📈</div>
+        <div class="kpi-label">User Adoption Rate</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">🎯</div>
+        <div class="kpi-label">Forecast Accuracy</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">📊</div>
+        <div class="kpi-label">Dashboard Engagement</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-label">Deliverable Completion Rate</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">
+    Supply Chain Dataset Analysis · Project #2 · 2025
+  </div>
+
+</div>
+</body>
+</html>
